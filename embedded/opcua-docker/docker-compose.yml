@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  opcua-server:
+    image: hyunho001211/rpi-opcua-server:latest
+    container_name: opcua_server_container
+    ports:
+      # 라즈베리파이의 4001번 포트와 컨테이너의 4001번 포트를 연결
+      - "4001:4001"
+    restart: unless-stopped # 도커가 재시작되거나, 컨테이너가 꺼지면 자동으로 다시 실행

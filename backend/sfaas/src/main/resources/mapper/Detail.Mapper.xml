@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.sfaas.mapper.DetailMapper">
+    <resultMap id="detailMap" type="com.team1.sfaas.model.DetailModel">
+        <result property="machine_id" column="machine_id"/>
+        <result property="machine_name" column="machine_name"/>
+        <result property="is_machine_run" column="is_running" jdbcType="BOOLEAN"/>
+        <result property="machine_date" column="status_update_dt" jdbcType="TIMESTAMP"/>
+        <result property="data_name" column="data_name"/>
+        <result property="threshold_up" column="threshold_up"/>
+        <result property="threshold_down" column="threshold_down"/>
+        <result property="value" column="value"/>
+        <result property="plc_create_dt" column="log_create_dt"/>
+        <result property="start_dt" column="start_dt" jdbcType="TIMESTAMP"/>
+        <result property="end_dt" column="end_dt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <select id="getMachineData" resultMap="detailMap"
+            parameterType="String">
+<!--        // get machineName, machineStartDate, isRun-->
+        SELECT machine_name, machine_id
+        FROM machine
+        WHERE machine_id NOT IN ('FACTORY', 'OUT')
+    </select>
+
+    <select id="getMachineName" resultMap="detailMap"
+            parameterType="String">
+        <!--        // get machineName, machineStartDate, isRun-->
+        SELECT machine_id
+        FROM machine
+        WHERE machine_name = #{machine_name}
+    </select>
+
+    <select id="getMachineInformation" resultMap="detailMap"
+            parameterType="String">
+        <!--        get dataName, dataValue, dataDate, dataThreshold-->
+        SELECT m.machine_name, m.is_running, m.status_update_dt
+        FROM machine m
+        WHERE m.machine_id = #{machine_id}
+    </select>
+
+    <select id="getPLCData" resultMap="detailMap"
+            parameterType="String">
+
+        <!--        get dataName, dataValue, dataDate, dataThreshold-->
+        SELECT m.machine_name, m.is_running, m.status_update_dt,
+            dd.data_name, dd.threshold_up, dd.threshold_down,
+            pl.value, pl.log_create_dt, d.start_dt, d.end_dt
+        FROM machine m
+        JOIN machine_data_map mdm ON m.machine_id = mdm.machine_id
+        JOIN data_definition dd ON mdm.data_id = dd.data_id
+        JOIN sensor s ON mdm.sensor_id = s.sensor_id
+        JOIN plc_log pl ON s.sensor_id = pl.sensor_id
+        JOIN downtime d ON m.machine_id = d.machine_id
+        WHERE m.machine_id = #{machine_id}
+    </select>
+
+    <select id="getDowntimeSecondsLastHour" resultType="long" parameterType="String">
+        SELECT COALESCE(SUM(TIMESTAMPDIFF(SECOND,
+        GREATEST(start_dt, NOW() - INTERVAL 1 HOUR),
+        LEAST(COALESCE(end_dt, NOW()), NOW())
+        )), 0)
+        FROM downtime
+        WHERE machine_id = #{machine_id}
+        AND start_dt &lt; NOW()
+        AND COALESCE(end_dt, NOW()) &gt; NOW() - INTERVAL 1 HOUR
+    </select>
+
+
+
+</mapper>

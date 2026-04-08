@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.team1.sfaas.mapper.DowntimeMapper">
+
+    <select id="selectTotalDowntimeToday" resultType="long">
+        SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_dt, COALESCE(end_dt, NOW()))), 0)
+        FROM downtime
+        WHERE DATE(start_dt) = CURDATE()
+        <if test="machineId != 'all'">
+            AND machine_id = #{machineId}
+        </if>
+    </select>
+
+    <select id="selectMostFrequentError" resultType="String">
+        SELECT e.error_name
+        FROM downtime d
+        JOIN error e ON d.error_id = e.error_id
+        <if test="machineId != 'all'">
+            WHERE d.machine_id = #{machineId}
+        </if>
+        GROUP BY e.error_name
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectLongestDowntimeMachine" resultType="String">
+        SELECT m.machine_name
+        FROM downtime d
+        JOIN machine m ON d.machine_id = m.machine_id
+        GROUP BY m.machine_name
+        ORDER BY SUM(TIMESTAMPDIFF(MINUTE, d.start_dt, COALESCE(d.end_dt, NOW()))) DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectWeeklyDowntimeTrends" resultType="map">
+        SELECT
+        DATE_FORMAT(start_dt, '%Y-%m-%d') AS day_label,
+        SUM(TIMESTAMPDIFF(MINUTE, start_dt, COALESCE(end_dt, NOW()))) AS total_minutes
+        FROM downtime
+        WHERE start_dt >= CURDATE() - INTERVAL 7 DAY
+        <if test="machineId != 'all'">
+            AND machine_id = #{machineId}
+        </if>
+        GROUP BY day_label
+        ORDER BY day_label ASC;
+    </select>
+
+    <select id="selectDowntimeLogs" resultType="com.team1.sfaas.model.DowntimeLog">
+        SELECT
+        d.downtime_id as id,
+        d.start_dt as startTime,
+        d.end_dt as endTime,
+        TIMESTAMPDIFF(MINUTE, d.start_dt, COALESCE(d.end_dt, NOW())) as duration,
+        d.error_id as errorCode,
+        e.error_name as errorName,
+        m.machine_name as machineName
+        FROM downtime d
+        JOIN error e ON d.error_id = e.error_id
+        JOIN machine m ON d.machine_id = m.machine_id
+        <if test="machineId != 'all'">
+            WHERE d.machine_id = #{machineId}
+        </if>
+        ORDER BY d.start_dt DESC
+    </select>
+
+    <select id="selectErrorDistributionByMachine" resultType="map">
+        SELECT m.machine_name as name, COUNT(*) as value
+        FROM downtime d
+        JOIN machine m ON d.machine_id = m.machine_id
+        WHERE d.error_id != '0000'
+        GROUP BY m.machine_name
+    </select>
+
+    <select id="selectErrorDistributionByType" resultType="map">
+        SELECT
+        CASE
+        WHEN m.machine_id LIKE '%OVEN%' THEN '오븐'
+        WHEN m.machine_id LIKE '%PAINT%' THEN '스프레이'
+        WHEN m.machine_id LIKE '%DEPO%' THEN '전착'
+        ELSE 'OTHER'
+        END as name,
+        COUNT(*) as value
+        FROM downtime d
+        JOIN machine m ON d.machine_id = m.machine_id
+        WHERE d.error_id != '0000'
+        GROUP BY name
+    </select>
+</mapper>

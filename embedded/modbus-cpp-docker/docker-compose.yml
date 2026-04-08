@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  modbus-server-cpp:
+    platform: linux/arm64
+    # 현재 폴더의 Dockerfile을 사용하여 이미지를 빌드
+    build: .
+    container_name: modbus_server
+    # 컨테이너가 멈추면 자동으로 다시 시작
+    restart: unless-stopped
+    
+    # 포트 매핑: 호스트의 502 포트를 컨테이너의 502 포트로 연결
+    ports:
+      - "502:502"
+      
+    # 라즈베리파이의 하드웨어(GPIO)에 접근하기 위한 필수 설정
+    # privileged 모드는 강력한 권한을 주므로 보안에 유의해야 합니다.
+    privileged: true
+    devices:
+      - "/dev/gpiomem:/dev/gpiomem"

@@ -57,6 +57,7 @@ npm run dev
 - **이지운**: SMWP 페이지 구축, Downtime, Defect, Detail 백엔드 구축,  Node-RED 서버 구축 
 - **이창열**: Login 페이지 구축, 채팅 서비스 구현
 
+[발표자료 PDF](./자동차 도장공정 모니터링 시스템 SFaaS 1조.pdf)
 
 ## 🎥 시연 영상
 [![Video Label](http://img.youtube.com/vi/4vvZFJvkxrw/0.jpg)](https://youtu.be/4vvZFJvkxrw)

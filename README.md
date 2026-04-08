@@ -59,7 +59,7 @@ npm run dev
 
 ## 발표자료
 
-[발표자료 PDF](./SFaaS 1조 자동차 도장공정 모니터링 시스템.pdf)
+[발표자료 PDF](./SFaaS%201조%20자동차%20도장공정%20모니터링%20시스템.pdf)
 
 ## 🎥 시연 영상
 [![Video Label](http://img.youtube.com/vi/4vvZFJvkxrw/0.jpg)](https://youtu.be/4vvZFJvkxrw)

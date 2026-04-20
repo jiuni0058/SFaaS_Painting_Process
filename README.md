@@ -26,7 +26,7 @@
 | **Embedded/Data**| Raspberry Pi, Node-RED, OPC-UA, Modbus, Docker |
 
 ## 🏗️ 시스템 아키텍처
-![system](./system%20architecture.png)
+![system](./system_architecture.png)
 
 1.  **데이터 수집**: 현장의 PLC 및 센서(온습도 등) 데이터를 OPC-UA를 통해 수집합니다.
 2.  **데이터 처리**: Node-RED가 수집된 데이터를 가공하여 비가동 시간을 계산하고, MySQL 데이터베이스에 저장합니다.
